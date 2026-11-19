@@ -1,0 +1,97 @@
+# id,name,category,mrp,store,listedPrice
+P101,Apple iPhone 15 (128 GB),Electronics,79900,Amazon,69999
+P101,Apple iPhone 15 (128 GB),Electronics,79900,Flipkart,68499
+P101,Apple iPhone 15 (128 GB),Electronics,79900,Croma,70990
+P102,Samsung Galaxy S24 (256 GB),Electronics,89999,Amazon,74999
+P102,Samsung Galaxy S24 (256 GB),Electronics,89999,Flipkart,73999
+P102,Samsung Galaxy S24 (256 GB),Electronics,89999,Croma,75490
+P103,Sony WH-1000XM5 Headphones,Electronics,34990,Amazon,26990
+P103,Sony WH-1000XM5 Headphones,Electronics,34990,Flipkart,27490
+P103,Sony WH-1000XM5 Headphones,Electronics,34990,Croma,26499
+P104,boAt Airdopes 141,Electronics,4490,Amazon,1099
+P104,boAt Airdopes 141,Electronics,4490,Flipkart,999
+P104,boAt Airdopes 141,Electronics,4490,Myntra,1149
+P105,Apple MacBook Air M3 (13-inch),Electronics,114900,Amazon,99990
+P105,Apple MacBook Air M3 (13-inch),Electronics,114900,Flipkart,101490
+P105,Apple MacBook Air M3 (13-inch),Electronics,114900,Croma,98990
+P106,Nike Revolution 7 Running Shoes,Fashion,3995,Amazon,2797
+P106,Nike Revolution 7 Running Shoes,Fashion,3995,Flipkart,2899
+P106,Nike Revolution 7 Running Shoes,Fashion,3995,Myntra,2696
+P107,Levi's 511 Slim Fit Jeans,Fashion,3599,Amazon,1979
+P107,Levi's 511 Slim Fit Jeans,Fashion,3599,Flipkart,2099
+P107,Levi's 511 Slim Fit Jeans,Fashion,3599,Myntra,1799
+P108,Puma Unisex Backpack,Fashion,2499,Amazon,749
+P108,Puma Unisex Backpack,Fashion,2499,Flipkart,699
+P108,Puma Unisex Backpack,Fashion,2499,Myntra,724
+P109,Prestige Iris 750W Mixer Grinder,Home,5195,Amazon,2899
+P109,Prestige Iris 750W Mixer Grinder,Home,5195,Flipkart,2949
+P109,Prestige Iris 750W Mixer Grinder,Home,5195,Croma,3099
+P110,Philips Air Fryer HD9200,Home,9995,Amazon,6499
+P110,Philips Air Fryer HD9200,Home,9995,Flipkart,6299
+P110,Philips Air Fryer HD9200,Home,9995,Croma,6790
+P111,Milton Thermosteel Flask 1L,Home,1250,Amazon,729
+P111,Milton Thermosteel Flask 1L,Home,1250,Flipkart,689
+P111,Milton Thermosteel Flask 1L,Home,1250,Myntra,749
+P112,Atomic Habits (Paperback),Books,799,Amazon,389
+P112,Atomic Habits (Paperback),Books,799,Flipkart,379
+P113,OnePlus Nord CE4 (128 GB),Electronics,26999,Amazon,24999
+P113,OnePlus Nord CE4 (128 GB),Electronics,26999,Flipkart,24499
+P113,OnePlus Nord CE4 (128 GB),Electronics,26999,Croma,24990
+P114,Apple iPad 10th Gen (64 GB),Electronics,34900,Amazon,30900
+P114,Apple iPad 10th Gen (64 GB),Electronics,34900,Flipkart,31499
+P114,Apple iPad 10th Gen (64 GB),Electronics,34900,Croma,29990
+P115,JBL Flip 6 Bluetooth Speaker,Electronics,14999,Amazon,9999
+P115,JBL Flip 6 Bluetooth Speaker,Electronics,14999,Flipkart,9499
+P115,JBL Flip 6 Bluetooth Speaker,Electronics,14999,Croma,10499
+P116,Samsung 43-inch Crystal 4K TV,Electronics,47900,Amazon,30990
+P116,Samsung 43-inch Crystal 4K TV,Electronics,47900,Flipkart,29990
+P116,Samsung 43-inch Crystal 4K TV,Electronics,47900,Croma,31490
+P117,Noise ColorFit Pro 5 Smartwatch,Electronics,7999,Amazon,3999
+P117,Noise ColorFit Pro 5 Smartwatch,Electronics,7999,Flipkart,3799
+P117,Noise ColorFit Pro 5 Smartwatch,Electronics,7999,Myntra,3899
+P118,Adidas Ultraboost Light Shoes,Fashion,18999,Amazon,12599
+P118,Adidas Ultraboost Light Shoes,Fashion,18999,Flipkart,13299
+P118,Adidas Ultraboost Light Shoes,Fashion,18999,Myntra,12999
+P119,H&M Oversized Cotton T-shirt,Fashion,799,Amazon,699
+P119,H&M Oversized Cotton T-shirt,Fashion,799,Flipkart,649
+P119,H&M Oversized Cotton T-shirt,Fashion,799,Myntra,599
+P120,Ray-Ban Aviator Classic Sunglasses,Fashion,9890,Amazon,8390
+P120,Ray-Ban Aviator Classic Sunglasses,Fashion,9890,Flipkart,8590
+P120,Ray-Ban Aviator Classic Sunglasses,Fashion,9890,Myntra,8901
+P121,Fossil Grant Chronograph Watch,Fashion,12495,Amazon,7497
+P121,Fossil Grant Chronograph Watch,Fashion,12495,Flipkart,7699
+P121,Fossil Grant Chronograph Watch,Fashion,12495,Myntra,7997
+P122,Pigeon Electric Kettle 1.5L,Home,1195,Amazon,599
+P122,Pigeon Electric Kettle 1.5L,Home,1195,Flipkart,579
+P122,Pigeon Electric Kettle 1.5L,Home,1195,Croma,649
+P123,Dyson V8 Absolute Vacuum Cleaner,Home,39900,Amazon,32900
+P123,Dyson V8 Absolute Vacuum Cleaner,Home,39900,Flipkart,33499
+P123,Dyson V8 Absolute Vacuum Cleaner,Home,39900,Croma,32490
+P124,Wakefit Memory Foam Pillow,Home,1999,Amazon,899
+P124,Wakefit Memory Foam Pillow,Home,1999,Flipkart,849
+P124,Wakefit Memory Foam Pillow,Home,1999,Myntra,949
+P125,The Psychology of Money,Books,499,Amazon,299
+P125,The Psychology of Money,Books,499,Flipkart,289
+P126,Head First Java (3rd Edition),Books,1250,Amazon,1062
+P126,Head First Java (3rd Edition),Books,1250,Flipkart,1099
+P127,Ikigai,Books,499,Amazon,279
+P127,Ikigai,Books,499,Flipkart,299
+P128,Minimalist 10% Niacinamide Serum,Beauty,599,Amazon,569
+P128,Minimalist 10% Niacinamide Serum,Beauty,599,Flipkart,549
+P128,Minimalist 10% Niacinamide Serum,Beauty,599,Myntra,579
+P129,Philips BT3221 Beard Trimmer,Beauty,1995,Amazon,1349
+P129,Philips BT3221 Beard Trimmer,Beauty,1995,Flipkart,1299
+P129,Philips BT3221 Beard Trimmer,Beauty,1995,Croma,1399
+P130,Nivea Soft Moisturising Cream 200ml,Beauty,399,Amazon,339
+P130,Nivea Soft Moisturising Cream 200ml,Beauty,399,Flipkart,345
+P130,Nivea Soft Moisturising Cream 200ml,Beauty,399,Myntra,349
+P131,Yonex Nanoray Badminton Racquet,Sports,3990,Amazon,2799
+P131,Yonex Nanoray Badminton Racquet,Sports,3990,Flipkart,2699
+P131,Yonex Nanoray Badminton Racquet,Sports,3990,Myntra,2899
+P132,Boldfit Yoga Mat 6mm,Sports,1999,Amazon,549
+P132,Boldfit Yoga Mat 6mm,Sports,1999,Flipkart,499
+P132,Boldfit Yoga Mat 6mm,Sports,1999,Myntra,579
+P133,Cosco Football Size 5,Sports,1150,Amazon,699
+P133,Cosco Football Size 5,Sports,1150,Flipkart,649
+P134,Strauss Adjustable Dumbbells 10kg,Sports,2999,Amazon,1799
+P134,Strauss Adjustable Dumbbells 10kg,Sports,2999,Flipkart,1749

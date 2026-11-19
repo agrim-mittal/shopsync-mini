@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lecture 5 (Build tools): Maven describes the project, its one dependency
+     (the H2 JDBC driver) and how to package everything into a runnable jar. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.shopsync</groupId>
+    <artifactId>shopsync-mini</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- Lecture 11 (JDBC): H2 is a small database that runs inside our program -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>shopsync-mini</finalName>
+        <plugins>
+            <!-- Packs our classes + the H2 driver into one jar: target/shopsync-mini.jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <descriptorRefs><descriptorRef>jar-with-dependencies</descriptorRef></descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <archive><manifest><mainClass>com.shopsync.mini.Main</mainClass></manifest></archive>
+                </configuration>
+                <executions>
+                    <execution><phase>package</phase><goals><goal>single</goal></goals></execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

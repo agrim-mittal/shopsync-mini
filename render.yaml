@@ -1,0 +1,8 @@
+# Render Blueprint for ShopSync Mini. Dashboard: New + > Blueprint > pick this repository.
+services:
+  - type: web
+    name: shopsync-mini
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    autoDeploy: true
