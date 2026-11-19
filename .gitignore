@@ -1,7 +1,7 @@
-target/
-data/
-logs/
-reports/
+/target/
+/data/
+/logs/
+/reports/
 .DS_Store
 .idea/
 *.iml
