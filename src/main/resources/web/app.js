@@ -1,4 +1,4 @@
-// ShopSync Mini front end: calls the Java server's /api/... endpoints and draws the results.
+// ShopSync front end: calls the Java server's /api/... endpoints and draws the results.
 const $ = (id) => document.getElementById(id);
 const rupees = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
 const storeColor = (name) => `var(--${name.toLowerCase()})`;
@@ -19,6 +19,10 @@ $("themeBtn").onclick = () => {
 async function api(path, method = "GET") {
   const res = await fetch(path, { method });
   const data = await res.json();
+  if (res.status === 401 && !path.startsWith("/api/auth")) {
+    location.href = "/login.html";               // session ended: back to the login page
+    throw new Error("Please log in");
+  }
   if (!res.ok) {
     const err = new Error(data.error || "Request failed");
     err.data = data;
@@ -365,5 +369,23 @@ $("catForm").onsubmit = async (e) => {
   } catch (err) { toast(err.message, { warn: true }); }
 };
 
+// ---------- account ----------
+async function loadUser() {
+  try {
+    const u = await api("/api/auth/me");
+    $("uname").textContent = u.name;
+    $("avatar").textContent = u.name.trim().charAt(0).toUpperCase();
+    $("userChip").title = "@" + u.username;
+    $("userChip").hidden = false;
+  } catch (e) {
+    location.href = "/login.html";
+  }
+}
+$("logoutBtn").onclick = async () => {
+  await post("/api/auth/logout");
+  location.href = "/login.html";
+};
+
+loadUser();
 init();
 api("/api/cart").then((c) => updateCount(c.count));

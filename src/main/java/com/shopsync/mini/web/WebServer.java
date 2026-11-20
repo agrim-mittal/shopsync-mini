@@ -1,6 +1,7 @@
 package com.shopsync.mini.web;
 
 import com.shopsync.mini.data.ReportWriter;
+import com.shopsync.mini.exception.AuthException;
 import com.shopsync.mini.exception.BudgetExceededException;
 import com.shopsync.mini.exception.InvalidSearchException;
 import com.shopsync.mini.exception.ProductNotFoundException;
@@ -11,6 +12,8 @@ import com.shopsync.mini.model.CartItem;
 import com.shopsync.mini.model.ComparisonResult;
 import com.shopsync.mini.model.Offer;
 import com.shopsync.mini.model.Product;
+import com.shopsync.mini.model.User;
+import com.shopsync.mini.service.AccountService;
 import com.shopsync.mini.service.CartService;
 import com.shopsync.mini.service.PriceComparisonService;
 import com.shopsync.mini.store.Store;
@@ -28,6 +31,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -42,13 +46,14 @@ public class WebServer {
     private static final Logger LOG = Logger.getLogger(WebServer.class.getName());
 
     private final PriceComparisonService service;
-    private final CartService cart;
+    private final AccountService accounts;
+    private final Map<String, String> sessions = new HashMap<>();   // login token -> username
     private final ReportWriter reports;
     private final int port;
 
-    public WebServer(PriceComparisonService service, CartService cart, ReportWriter reports, int port) {
+    public WebServer(PriceComparisonService service, AccountService accounts, ReportWriter reports, int port) {
         this.service = service;
-        this.cart = cart;
+        this.accounts = accounts;
         this.reports = reports;
         this.port = port;
     }
@@ -71,42 +76,65 @@ public class WebServer {
         server.createContext("/api/stores", ex -> handle(ex, this::storesJson));
         server.createContext("/api/report", this::sendReport);
 
-        // ---- cart ----
-        server.createContext("/api/cart", ex -> handle(ex, this::cartJson));
+        // ---- accounts ----
+        server.createContext("/api/auth/login", ex -> handle(ex, () -> {
+            Map<String, String> f = form(ex);
+            return startSession(ex, accounts.login(f.get("username"), f.get("password")));
+        }));
+        server.createContext("/api/auth/register", ex -> handle(ex, () -> {
+            Map<String, String> f = form(ex);
+            return startSession(ex, accounts.register(f.get("username"), f.get("password"), f.get("name")));
+        }));
+        server.createContext("/api/auth/logout", ex -> handle(ex, () -> {
+            sessions.remove(token(ex));
+            ex.getResponseHeaders().add("Set-Cookie", "ssid=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax");
+            return "{\"ok\":true}";
+        }));
+        server.createContext("/api/auth/me", ex -> handle(ex, () -> userJson(currentUser(ex))));
+
+        // ---- cart (each user has their own) ----
+        server.createContext("/api/cart", ex -> handle(ex, () -> cartJson(cart(ex))));
         server.createContext("/api/cart/add", ex -> handle(ex, () -> {
             Map<String, String> q = params(ex);
+            CartService cart = cart(ex);
             cart.addToCart(q.get("id"), q.get("store"), intParam(q, "qty", 1), "1".equals(q.get("force")));
-            return cartJson();
+            return cartJson(cart);
         }));
         server.createContext("/api/cart/qty", ex -> handle(ex, () -> {
             Map<String, String> q = params(ex);
+            CartService cart = cart(ex);
             cart.changeQuantity(q.get("key"), intParam(q, "qty", 1));
-            return cartJson();
+            return cartJson(cart);
         }));
         server.createContext("/api/cart/remove", ex -> handle(ex, () -> {
+            CartService cart = cart(ex);
             cart.remove(params(ex).get("key"));
-            return cartJson();
+            return cartJson(cart);
         }));
         server.createContext("/api/cart/clear", ex -> handle(ex, () -> {
+            CartService cart = cart(ex);
             cart.clearCart();
-            return cartJson();
+            return cartJson(cart);
         }));
         server.createContext("/api/cart/switch", ex -> handle(ex, () -> {
             Map<String, String> q = params(ex);
+            CartService cart = cart(ex);
             cart.switchStore(q.get("key"), q.get("store"));
-            return budgetJson();
+            return budgetJson(cart);
         }));
 
         // ---- budget ----
-        server.createContext("/api/budget", ex -> handle(ex, this::budgetJson));
+        server.createContext("/api/budget", ex -> handle(ex, () -> budgetJson(cart(ex))));
         server.createContext("/api/budget/set", ex -> handle(ex, () -> {
+            CartService cart = cart(ex);
             cart.setMonthlyBudget(doubleParam(params(ex), "amount"));
-            return budgetJson();
+            return budgetJson(cart);
         }));
         server.createContext("/api/budget/category", ex -> handle(ex, () -> {
             Map<String, String> q = params(ex);
+            CartService cart = cart(ex);
             cart.setCategoryLimit(q.get("name"), doubleParam(q, "amount"));
-            return budgetJson();
+            return budgetJson(cart);
         }));
         server.createContext("/", this::sendStaticFile);
 
@@ -127,6 +155,9 @@ public class WebServer {
         String body;
         try {
             body = action.run();
+        } catch (AuthException e) {
+            status = 401;                                   // 401 = "not logged in / wrong password"
+            body = errorJson(e.getMessage());
         } catch (BudgetExceededException e) {
             status = 409;                                   // 409 = "conflict": needs the user to confirm
             body = "{\"error\":" + str(e.getMessage()) + ",\"overBudget\":true,\"overBy\":" + e.getOverBy() + "}";
@@ -159,6 +190,15 @@ public class WebServer {
         String path = ex.getRequestURI().getPath();
         if (path.equals("/")) {
             path = "/index.html";
+        }
+        // The app needs a log-in; the login page doesn't.
+        if (path.equals("/index.html") && !isLoggedIn(ex)) {
+            redirect(ex, "/login.html");
+            return;
+        }
+        if (path.equals("/login.html") && isLoggedIn(ex)) {
+            redirect(ex, "/");
+            return;
         }
         if (path.contains("..")) {
             send(ex, 400, "text/plain", new byte[0]);
@@ -196,6 +236,77 @@ public class WebServer {
             map.put(kv[0], value);
         }
         return map;
+    }
+
+    // ------------------------------------------------------------ log-in sessions
+
+    /** Creates a random login token, remembers whose it is, and sends it as a cookie. */
+    private String startSession(HttpExchange ex, User user) {
+        String token = UUID.randomUUID().toString();
+        sessions.put(token, user.getUsername());
+        String secure = "https".equalsIgnoreCase(ex.getRequestHeaders().getFirst("X-Forwarded-Proto")) ? "; Secure" : "";
+        ex.getResponseHeaders().add("Set-Cookie",
+                "ssid=" + token + "; Path=/; Max-Age=604800; HttpOnly; SameSite=Lax" + secure);
+        return userJson(user);
+    }
+
+    private String token(HttpExchange ex) {
+        String cookies = ex.getRequestHeaders().getFirst("Cookie");
+        if (cookies == null) {
+            return "";
+        }
+        for (String part : cookies.split(";")) {
+            String[] kv = part.trim().split("=", 2);
+            if (kv.length == 2 && kv[0].equals("ssid")) {
+                return kv[1];
+            }
+        }
+        return "";
+    }
+
+    private User currentUser(HttpExchange ex) throws AuthException {
+        String username = sessions.get(token(ex));
+        User user = (username == null) ? null : accounts.findUser(username);
+        if (user == null) {
+            throw new AuthException("Please log in");
+        }
+        return user;
+    }
+
+    /** The logged-in user's own cart and budget. */
+    private CartService cart(HttpExchange ex) throws AuthException {
+        return accounts.cartFor(currentUser(ex));
+    }
+
+    private boolean isLoggedIn(HttpExchange ex) {
+        String username = sessions.get(token(ex));
+        return username != null && accounts.findUser(username) != null;
+    }
+
+    /** Reads a POST body like "username=agrim&password=secret" (keeps passwords out of the URL). */
+    private Map<String, String> form(HttpExchange ex) throws IOException {
+        if (!"POST".equalsIgnoreCase(ex.getRequestMethod())) {
+            throw new IllegalArgumentException("Use POST");
+        }
+        String body = new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        Map<String, String> map = new HashMap<>();
+        for (String pair : body.split("&")) {
+            String[] kv = pair.split("=", 2);
+            if (kv.length == 2) {
+                map.put(kv[0], URLDecoder.decode(kv[1], StandardCharsets.UTF_8));
+            }
+        }
+        return map;
+    }
+
+    private String userJson(User u) {
+        return "{\"username\":" + str(u.getUsername()) + ",\"name\":" + str(u.getDisplayName()) + "}";
+    }
+
+    private void redirect(HttpExchange ex, String to) throws IOException {
+        ex.getResponseHeaders().set("Location", to);
+        ex.sendResponseHeaders(302, -1);
+        ex.close();
     }
 
     private int intParam(Map<String, String> q, String name, int fallback) {
@@ -238,7 +349,7 @@ public class WebServer {
         return sb.append(']').toString();
     }
 
-    private String cartJson() {
+    private String cartJson(CartService cart) {
         Cart c = cart.getCart();
         Budget b = cart.getBudget();
         StringBuilder sb = new StringBuilder("{\"items\":[");
@@ -261,7 +372,7 @@ public class WebServer {
         return sb.toString();
     }
 
-    private String budgetJson() {
+    private String budgetJson(CartService cart) {
         BudgetReport r = cart.checkBudget();
         Budget b = cart.getBudget();
         StringBuilder sb = new StringBuilder("{");

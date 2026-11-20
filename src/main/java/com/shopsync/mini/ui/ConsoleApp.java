@@ -1,6 +1,7 @@
 package com.shopsync.mini.ui;
 
 import com.shopsync.mini.data.ReportWriter;
+import com.shopsync.mini.exception.AuthException;
 import com.shopsync.mini.exception.BudgetExceededException;
 import com.shopsync.mini.exception.InvalidSearchException;
 import com.shopsync.mini.exception.ProductNotFoundException;
@@ -10,6 +11,8 @@ import com.shopsync.mini.model.CartItem;
 import com.shopsync.mini.model.ComparisonResult;
 import com.shopsync.mini.model.Offer;
 import com.shopsync.mini.model.Product;
+import com.shopsync.mini.model.User;
+import com.shopsync.mini.service.AccountService;
 import com.shopsync.mini.service.CartService;
 import com.shopsync.mini.service.PriceComparisonService;
 import com.shopsync.mini.store.Store;
@@ -30,7 +33,9 @@ import java.util.Scanner;
 public class ConsoleApp {
 
     private final PriceComparisonService service;
-    private final CartService cartService;
+    private final AccountService accounts;
+    private CartService cartService;          // the logged-in user's cart (set after log-in)
+    private User user;
     private final ReportWriter reports;
     private final Scanner in = new Scanner(System.in);
     private final Screen screen = new Screen();
@@ -38,15 +43,18 @@ public class ConsoleApp {
     private ComparisonResult lastResult;     // remembered for sorting, saving and adding to cart
     private String sortBy = "price";
 
-    public ConsoleApp(PriceComparisonService service, CartService cartService, ReportWriter reports) {
+    public ConsoleApp(PriceComparisonService service, AccountService accounts, ReportWriter reports) {
         this.service = service;
-        this.cartService = cartService;
+        this.accounts = accounts;
         this.reports = reports;
     }
 
     public void run() {
         screen.banner();
         try {
+            if (!logIn()) {
+                return;
+            }
             int choice;
             do {
                 screen.menu();
@@ -75,6 +83,42 @@ public class ConsoleApp {
         } finally {
             in.close();                // finally always runs, even after an exception
         }
+    }
+
+    // ------------------------------------------------------------ log in
+
+    /** Log in or sign up before the main menu. Returns false if the user chose to exit. */
+    private boolean logIn() {
+        while (user == null) {
+            System.out.println();
+            System.out.println("  1. Log in   2. Sign up   0. Exit");
+            System.out.print("  > ");
+            int choice = readInt();
+            if (choice == 0) {
+                System.out.println("Bye!");
+                return false;
+            }
+            try {
+                System.out.print("  Username: ");
+                String name = in.nextLine();
+                System.out.print("  Password: ");
+                String password = in.nextLine();
+                if (choice == 1) {
+                    user = accounts.login(name, password);
+                } else if (choice == 2) {
+                    System.out.print("  Your name: ");
+                    user = accounts.register(name, password, in.nextLine());
+                } else {
+                    System.out.println("  ! Please choose 1, 2 or 0.");
+                }
+            } catch (AuthException e) {
+                System.out.println("  ! " + e.getMessage());
+            }
+        }
+        cartService = accounts.cartFor(user);
+        System.out.println();
+        System.out.println("  Welcome, " + user.getDisplayName() + "!");
+        return true;
     }
 
     // ------------------------------------------------------------ compare
@@ -342,8 +386,9 @@ public class ConsoleApp {
 
         void banner() {
             System.out.println();
-            System.out.println("  ShopSync Mini  |  compare prices across Amazon, Flipkart, Myntra and Croma");
+            System.out.println("  ShopSync  |  compare prices across Amazon, Flipkart, Myntra and Croma");
             System.out.println("  ---------------------------------------------------------------------------");
+            System.out.println("  Demo account: " + AccountService.DEMO_USER + " / " + AccountService.DEMO_PASSWORD);
         }
 
         void menu() {
@@ -357,7 +402,7 @@ public class ConsoleApp {
             System.out.printf("  7. My cart (%d item%s)%n", cartService.getCart().getItemCount(),
                     cartService.getCart().getItemCount() == 1 ? "" : "s");
             System.out.println("  8. Monthly budget check");
-            System.out.println("  0. Exit");
+            System.out.println("  0. Log out and exit  (logged in as " + user.getUsername() + ")");
             System.out.print("  > ");
         }
 

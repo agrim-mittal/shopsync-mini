@@ -1,7 +1,8 @@
-# ShopSync Mini
+# ShopSync
 
-A small version of ShopSync with three features:
+ShopSync has a login and three main features:
 
+- **Log in / Sign up**: each user has their own cart and budget. Demo account: `demo` / `demo123`. Passwords are salted and hashed (SHA-256), never stored as plain text.
 0. **Product catalogue** on the home page: every product grouped by category (filter chips), each showing its best price and store. Click one to compare. In the console: option 2, *Browse all products by category*.
 1. **Compare prices** of a product across Amazon, Flipkart, Myntra and Croma, including each store's extra offer and delivery charge.
 2. **My cart**: add a product from any store, change quantities, remove items. The cart is saved between runs.
@@ -47,7 +48,8 @@ com.shopsync.mini
 ├── store/                 PriceCalculator (interface), Store (abstract), Amazon, Flipkart, Myntra, Croma
 ├── exception/             ProductNotFoundException, InvalidSearchException, BudgetExceededException
 ├── data/                  CsvLoader, ProductRepository (JDBC), SerialStore<T>, ReportWriter
-├── service/               PriceComparisonService, CartService, BudgetService (the logic both UIs use)
+├── service/               PriceComparisonService, CartService, BudgetService,
+│                          AccountService (sign-up, log-in, one CartService per user)
 ├── ui/                    ConsoleApp (terminal menu)
 └── web/                   WebServer (web plumbing only, see note below)
 ```
@@ -70,6 +72,7 @@ com.shopsync.mini
 | 6 | **Exception handling** | Custom **checked** `ProductNotFoundException` and `BudgetExceededException` (carries extra data: how much over). `BudgetService.ensureFits()` **throws** it, `CartService.addToCart()` passes it up with `throws`, and the UI **catches** it to ask "Add anyway?". **Unchecked** `InvalidSearchException`; `IllegalArgumentException` for bad quantity/budget values. `try-catch-finally` (`ConsoleApp.run`), multi-catch, try-with-resources, wrapping `SQLException` |
 | 7 | **Collections & utility classes** | `ArrayList`, `LinkedList` (history), `HashMap` (URL params), `LinkedHashMap` (stores; cart items keyed by `productId@store`), `TreeMap` (category totals and limits, sorted A–Z), `Map<String, List<ComparisonResult>>`: a map of lists for the home-page catalogue (`PriceComparisonService.getCatalog()`), `Map.Entry` / `entrySet()` loop (`BudgetService.check`), `getOrDefault`, `Collections.sort`, `Comparator`, `Math.min`, `String.format`. **Generics**: `SerialStore<T extends Serializable>` used as `SerialStore<Cart>`, `SerialStore<Budget>`, `SerialStore<SearchHistory>` |
 | 8 | **File I/O** | `CsvLoader` reads with `FileReader` + `BufferedReader`; `ReportWriter` writes with `FileWriter` + `BufferedWriter` + `PrintWriter`; `File.mkdirs()` |
+| 6 | **Login (exceptions)** | Custom checked `AuthException` (wrong password, username taken, password too short) → HTTP 401 on the website, a "!" message in the console |
 | 9 | **Serialization** | `SearchHistory`, `Cart`, `CartItem` and `Budget` implement `Serializable` (with `serialVersionUID`; `SearchHistory` has a `transient` field). One reusable `SerialStore<T>` uses `ObjectOutputStream` / `ObjectInputStream` → `data/history.ser`, `data/cart.ser`, `data/budget.ser`, so the cart and budget survive a restart |
 | 10 | **Logging** | `java.util.logging.Logger` in every data/service class; `Main.setUpLogging()` adds a `FileHandler` + `SimpleFormatter` → `logs/shopsync-mini.log`, with different levels for console vs web mode |
 | 11 | **JDBC** | `ProductRepository`: `DriverManager.getConnection`, `Statement` for `CREATE TABLE`, `PreparedStatement` with `?` placeholders, `addBatch`/`executeBatch`, `ResultSet` loops (`findAll()` with `ORDER BY category, name` for the catalogue), implements `AutoCloseable` |

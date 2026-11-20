@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ShopSync Mini · Compare prices</title>
+  <title>ShopSync · Compare prices</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
@@ -15,13 +15,18 @@
         <span class="brand-mark">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 13.5A7 7 0 0 1 16.9 6.1"/><path d="M17.6 2.8v3.9h-3.9"/><path d="M18.8 10.5a7 7 0 0 1-11.7 7.4"/><path d="M6.4 21.2v-3.9h3.9"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg>
         </span>
-        <span class="brand-text">ShopSync</span> <span class="brand-tag">Mini</span>
+        <span class="brand-text">ShopSync</span>
       </a>
       <nav class="tabs" id="tabs">
         <button data-view="compare" class="on">Compare</button>
         <button data-view="cart">Cart <span class="count" id="cartCount">0</span></button>
         <button data-view="budget">Budget</button>
       </nav>
+      <div class="user-chip" id="userChip" hidden>
+        <span class="avatar" id="avatar">?</span>
+        <span class="uname" id="uname"></span>
+        <button id="logoutBtn" type="button">Log out</button>
+      </div>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
       </button>
@@ -187,7 +192,7 @@
 
   <div class="toast" id="toast" hidden><span id="toastText"></span><button id="toastAction" hidden></button></div>
 
-  <footer class="wrap footer">ShopSync Mini · Java course project · prices are sample data</footer>
+  <footer class="wrap footer">ShopSync · Java course project · prices are sample data</footer>
   <script src="/app.js"></script>
 </body>
 </html>

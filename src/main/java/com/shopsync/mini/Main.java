@@ -4,11 +4,9 @@ import com.shopsync.mini.data.CsvLoader;
 import com.shopsync.mini.data.ProductRepository;
 import com.shopsync.mini.data.ReportWriter;
 import com.shopsync.mini.data.SerialStore;
-import com.shopsync.mini.model.Budget;
-import com.shopsync.mini.model.Cart;
 import com.shopsync.mini.model.SearchHistory;
 import com.shopsync.mini.service.BudgetService;
-import com.shopsync.mini.service.CartService;
+import com.shopsync.mini.service.AccountService;
 import com.shopsync.mini.service.PriceComparisonService;
 import com.shopsync.mini.ui.ConsoleApp;
 import com.shopsync.mini.web.WebServer;
@@ -56,18 +54,17 @@ public class Main {
             // 3. Serialization: history, cart and budget are each saved in data/*.ser
             PriceComparisonService service = new PriceComparisonService(repository,
                     new SerialStore<SearchHistory>(new File(dataDir, "history.ser")));
-            CartService cartService = new CartService(service, new BudgetService(service),
-                    new SerialStore<Cart>(new File(dataDir, "cart.ser")),
-                    new SerialStore<Budget>(new File(dataDir, "budget.ser")));
+            // 4. Accounts: each user has their own cart and budget in data/users/<name>/
+            AccountService accounts = new AccountService(service, new BudgetService(service), dataDir);
             ReportWriter reports = new ReportWriter(new File("reports"));
 
             if (consoleMode) {
                 try (repository) {                         // closes the DB when the menu ends
-                    new ConsoleApp(service, cartService, reports).run();
+                    new ConsoleApp(service, accounts, reports).run();
                 }
             } else {
                 int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8080"));
-                new WebServer(service, cartService, reports, port).start();
+                new WebServer(service, accounts, reports, port).start();
             }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "ShopSync Mini could not start", e);
